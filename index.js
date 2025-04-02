@@ -3,9 +3,11 @@ const express = require('express');
 const userRoutes = require('./routes/userRoutes');
 const mongoose = require('mongoose');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Use environment variable or default to 3000
+const cors = require('cors'); // Import CORS middleware
+require('dotenv').config(); // Load environment variables from .env file
 
-mongoose.connect('mongodb+srv://am499702:ih5g4KhVw4zPYekk@crud.hxdlq0z.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.mongo_url, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 

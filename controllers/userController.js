@@ -3,7 +3,7 @@ const User = require('../models/User'); // Import the Mongoose User model
 // Get all users
 exports.getUsers = async (req, res) => {
     try {
-        const users = await User.find(); // Fetch all users from MongoDB
+        const users = await User.find({isDeleted:false}); // Fetch all users from MongoDB which are not deleted.
         res.json(users);
     } catch (err) {
         res.status(500).send('Server Error');
@@ -61,10 +61,29 @@ exports.updateUser = async (req, res) => {
 // Delete user by ID
 exports.deleteUser = async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id); // Delete user by ID
+        const user = await User.findById(req.params.id); // Find user by ID
         if (!user) return res.status(404).send("User not found");
+        user.isDeleted = true; // Mark user as deleted
+        user.deletedAt = new Date(); // Set deletion date
+        await user.save(); // Save the updated user
 
         res.status(200).json({ message: 'User deleted successfully' }); // Respond with no content
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+};
+
+
+exports.restoreUser=async(req,res)=>{
+    try {
+        const user = await User.findById(req.params.id); // Find user by ID
+        if (!user) return res.status(404).send("User not found");
+        
+        user.isDeleted = false; // Mark user as not deleted
+        user.deletedAt = null; // Clear deletion date
+        await user.save(); // Save the updated user
+
+        res.status(200).json({ message: 'User restored successfully' }); // Respond with success message
     } catch (err) {
         res.status(500).send('Server Error');
     }
